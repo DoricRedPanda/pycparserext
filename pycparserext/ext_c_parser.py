@@ -573,6 +573,11 @@ class GnuCParser(_AsmAndAttributesMixin, CParserBase):
                              | __VOLATILE__
         """
         p[0] = p[1]
+
+    def p_conditional_expression_omitted(self, p):
+        """ conditional_expression  : binary_expression CONDOP COLON conditional_expression
+        """
+        p[0] = c_ast.TernaryOp(p[1], p[1], p[4], p[1].coord)
 # }}}
 
 
