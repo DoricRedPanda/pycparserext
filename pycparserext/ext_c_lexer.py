@@ -73,7 +73,8 @@ _GNU_KEYWORDS = [
     '__restrict__', '__restrict',
     '__inline__', '__inline',
     '__extension__',
-    '__volatile', '__volatile__']
+    '__volatile', '__volatile__',
+    '__label__']
 
 add_lexer_keywords(GnuCLexer, _COMMON_KEYWORDS + _GNU_KEYWORDS)
 

@@ -71,12 +71,13 @@ class AttributeSpecifier(c_ast.Node):
 
 class Asm(c_ast.Node):
     def __init__(self, asm_keyword, template, output_operands,
-            input_operands, clobbered_regs, coord=None):
+            input_operands, clobbered_regs, label, coord=None):
         self.asm_keyword = asm_keyword
         self.template = template
         self.output_operands = output_operands
         self.input_operands = input_operands
         self.clobbered_regs = clobbered_regs
+        self.label = label
         self.coord = coord
 
     def children(self):
@@ -307,27 +308,35 @@ class _AsmMixin(object):
     def p_asm_1(self, p):
         """ asm_no_semi : asm_keyword LPAREN asm_argument_expression_list RPAREN
         """
-        p[0] = Asm(p[1], p[3], None, None, None, coord=self._coord(p.lineno(2)))
+        p[0] = Asm(p[1], p[3], None, None, None, None, coord=self._coord(p.lineno(2)))
 
     def p_asm_2(self, p):
         """ asm_no_semi : asm_keyword LPAREN asm_argument_expression_list COLON \
                 asm_argument_expression_list RPAREN
         """
-        p[0] = Asm(p[1], p[3], p[5], None, None, coord=self._coord(p.lineno(2)))
+        p[0] = Asm(p[1], p[3], p[5], None, None, None, coord=self._coord(p.lineno(2)))
 
     def p_asm_3(self, p):
         """ asm_no_semi : asm_keyword LPAREN asm_argument_expression_list COLON \
                 asm_argument_expression_list COLON asm_argument_expression_list \
                 RPAREN
         """
-        p[0] = Asm(p[1], p[3], p[5], p[7], None, coord=self._coord(p.lineno(2)))
+        p[0] = Asm(p[1], p[3], p[5], p[7], None, None, coord=self._coord(p.lineno(2)))
 
     def p_asm_4(self, p):
         """ asm_no_semi : asm_keyword LPAREN asm_argument_expression_list COLON \
                 asm_argument_expression_list COLON asm_argument_expression_list \
                 COLON asm_argument_expression_list RPAREN
         """
-        p[0] = Asm(p[1], p[3], p[5], p[7], p[9], coord=self._coord(p.lineno(2)))
+        p[0] = Asm(p[1], p[3], p[5], p[7], p[9], None, coord=self._coord(p.lineno(2)))
+
+    def p_asm_5(self, p):
+        """ asm_no_semi : asm_keyword LPAREN asm_argument_expression_list COLON \
+                asm_argument_expression_list COLON asm_argument_expression_list \
+                COLON asm_argument_expression_list COLON \
+                asm_argument_expression_list RPAREN
+        """
+        p[0] = Asm(p[1], p[3], p[5], p[7], p[9], p[11], coord=self._coord(p.lineno(2)))
 
     def p_asm_keyword(self, p):
         """ asm_keyword : __ASM__ asm_volatile_opt
@@ -340,6 +349,7 @@ class _AsmMixin(object):
 
     def p_asm_volatile_opt(self, p):
         """ asm_volatile_opt : unified_volatile
+                             | GOTO
                              | empty
         """
         p[0] = p[1]
@@ -578,6 +588,12 @@ class GnuCParser(_AsmAndAttributesMixin, CParserBase):
         """ conditional_expression  : binary_expression CONDOP COLON conditional_expression
         """
         p[0] = c_ast.TernaryOp(p[1], p[1], p[4], p[1].coord)
+
+
+    def p_local_label(self, p):
+        """ expression_statement : __LABEL__ ID SEMI
+        """
+        p[0] = c_ast.EmptyStatement(self._token_coord(p, 2))
 # }}}
 
 
