@@ -594,6 +594,11 @@ class GnuCParser(_AsmAndAttributesMixin, CParserBase):
         """ expression_statement : __LABEL__ ID SEMI
         """
         p[0] = c_ast.EmptyStatement(self._token_coord(p, 2))
+
+    def p_label_address_op(self, p):
+        """ unary_operator  : LAND
+        """
+        p[0] = p[1]
 # }}}
 
 
