@@ -595,10 +595,16 @@ class GnuCParser(_AsmAndAttributesMixin, CParserBase):
         """
         p[0] = c_ast.EmptyStatement(self._token_coord(p, 2))
 
-    def p_label_address_op(self, p):
+    def p_unary_operator_gnu_1(self, p):
         """ unary_operator  : LAND
         """
         p[0] = p[1]
+
+    def p_postfix_expression_7(self, p):
+        """ postfix_expression  : LPAREN type_name RPAREN brace_open brace_close
+        """
+        p[0] = c_ast.Constant(p[2], None)
+
 # }}}
 
 
